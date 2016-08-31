@@ -22,12 +22,20 @@ protected:
     void begin_atomic() { Thread::lock(); }
     void end_atomic() { Thread::unlock(); }
 
-    void sleep() { Thread::yield(); } // implicit unlock()
-    void wakeup() { end_atomic(); }
-    void wakeup_all() { end_atomic(); }
+    void sleep() {
+      // Thread::yield();
+      Thread::sleep();
+    } // implicit unlock()
+    void wakeup() {
+      // end_atomic();
+      Thread::wakeup();
+    }
+    void wakeup_all() {
+      end_atomic();
+      // Thread::wakeup_all();
+    }
 };
 
 __END_SYS
 
 #endif
-

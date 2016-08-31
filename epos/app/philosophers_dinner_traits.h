@@ -39,7 +39,11 @@ template<> struct Traits<Debug>
     static const bool error   = true;
     static const bool warning = true;
     static const bool info    = false;
+<<<<<<< HEAD
     static const bool trace   = false;
+=======
+    static const bool trace   = true;
+>>>>>>> 392ea6ae5bd1248283580de456b0d054ce5d0dc0
 };
 
 template<> struct Traits<Lists>: public Traits<void>

@@ -81,6 +81,9 @@ public:
     static Thread * volatile self() { return running(); }
     static void yield();
     static void exit(int status = 0);
+    static void sleep();
+    static void wakeup();
+    static void wakeup_all();
 
 protected:
     void constructor_prolog(unsigned int stack_size);
@@ -114,6 +117,7 @@ private:
     static Thread * volatile _running;
     static Queue _ready;
     static Queue _suspended;
+    static Queue _waiting;
 };
 
 

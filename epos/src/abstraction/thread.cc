@@ -17,7 +17,7 @@ Scheduler_Timer * Thread::_timer;
 Thread* volatile Thread::_running;
 Thread::Queue Thread::_ready;
 Thread::Queue Thread::_suspended;
-Thread::Queue Thread::_waiting;
+Thread::Queue Thread::_waiting; // queue for the threads on waiting status
 
 // Methods
 void Thread::constructor_prolog(unsigned int stack_size)
@@ -61,6 +61,7 @@ Thread::~Thread()
 
     _ready.remove(this);
     _suspended.remove(this);
+    _waiting.remove(this); // the thread must be removed from all queues when it is destroied
 
     unlock();
 
@@ -190,7 +191,7 @@ void Thread::wakeup()
 {
   lock();
 
-  db<Thread>(TRC) << "Thread::wakeup()" << endl;
+  db<Thread>(TRC) << "Thread::wakeup(running=" << _running << ")" << endl;
 
   if(!_waiting.empty()){
       Thread * thread = _waiting.remove()->object();
@@ -204,7 +205,17 @@ void Thread::wakeup()
 
 void Thread::wakeup_all()
 {
+  lock();
 
+  db<Thread>(TRC) << "Thread::wakeup_all(running=" << _running << ")" << endl;
+
+  while(!_waiting.empty()){
+    Thread * thread = _waiting.remove()->object();
+    thread->_state = READY;
+    _ready.insert(&thread->_link);
+  }
+
+  unlock();
 }
 
 

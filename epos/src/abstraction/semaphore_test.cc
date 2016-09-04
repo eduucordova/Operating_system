@@ -2,7 +2,7 @@
 
 #include <utility/ostream.h>
 #include <thread.h>
-#include <mutex.h>
+// #include <mutex.h>
 #include <semaphore.h>
 #include <alarm.h>
 #include <display.h>
@@ -11,7 +11,8 @@ using namespace EPOS;
 
 const int iterations = 10;
 
-Mutex table;
+// Mutex table;
+Semaphore table;
 
 Thread * phil[5];
 Semaphore * chopstick[5];
@@ -25,20 +26,24 @@ int philosopher(int n, int l, int c)
 
     for(int i = iterations; i > 0; i--) {
 
-        table.lock();
+        // table.lock();
+        table.p();
         Display::position(l, c);
         cout << "thinking";
-        table.unlock();
+        // table.unlock();
+        table.v();
 
         Delay thinking(2000000);
 
         chopstick[first]->p();   // get first chopstick
         chopstick[second]->p();   // get second chopstick
 
-        table.lock();
+        // table.lock();
+        table.p();
         Display::position(l, c);
         cout << " eating ";
-        table.unlock();
+        // table.unlock();
+        table.v();
 
         Delay eating(1000000);
 
@@ -46,24 +51,27 @@ int philosopher(int n, int l, int c)
         chopstick[second]->v();   // release second chopstick
     }
 
-    table.lock();
+    // table.lock();
+    table.p();
     Display::position(l, c);
     cout << "  done  ";
-    table.unlock();
+    // table.unlock();
+    table.v();
 
     return iterations;
 }
 
 int main()
 {
-    table.lock();
+    // table.lock();
+    table.p();
     Display::clear();
     Display::position(0, 0);
     cout << "The Philosopher's Dinner:" << endl;
 
     for(int i = 0; i < 5; i++)
-        chopstick[i] = new Semaphore;
 
+    chopstick[i] = new Semaphore;
     phil[0] = new Thread(&philosopher, 0,  5, 32);
     phil[1] = new Thread(&philosopher, 1, 10, 44);
     phil[2] = new Thread(&philosopher, 2, 16, 39);
@@ -85,14 +93,17 @@ int main()
     Display::position(19, 0);
 
     cout << "The dinner is served ..." << endl;
-    table.unlock();
+    // table.unlock();
+    table.v();
 
     for(int i = 0; i < 5; i++) {
         int ret = phil[i]->join();
-        table.lock();
+        // table.lock();
+        table.p();
         Display::position(20 + i, 0);
         cout << "Philosopher " << i << " ate " << ret << " times " << endl;
-        table.unlock();
+        // table.unlock();
+        table.v();
     }
 
     for(int i = 0; i < 5; i++)

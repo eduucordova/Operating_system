@@ -26,7 +26,7 @@ void Semaphore::p()
     // while(_value < 0)
     //     sleep();
     if(_value < 0){ // avoid the loop that would make the cpu busy while _value < 0 (while the semaphore is locked)
-      sleep();
+      Thread::sleep();
     } else {
       end_atomic();
     }
@@ -41,7 +41,7 @@ void Semaphore::v()
 
     finc(_value);
     if(_value < 1) {
-        wakeup();
+        Thread::wakeup();
     } else {
       end_atomic();
     }

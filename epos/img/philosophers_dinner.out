@@ -1,43 +1,41 @@
-PC_Setup(bi=0x00107000,sp=0x00106efc)
-PC_Setup::detect_memory()
-PC_Setup::calibrate_timers()
-PC_Setup::detect_pci()
 Setting up this machine as follows: 
-  Processor:    IA32 at 2002 MHz (BUS clock = 125 MHz)
+  Processor:    IA32 at 2000 MHz (BUS clock = 125 MHz)
   Memory:       262144 Kbytes [0x00000000:0x10000000]
   User memory:  261800 Kbytes [0x00000000:0x0ffaa000]
   PCI aperture: 44996 Kbytes [0xfc000000:0xfebf1000]
   Node Id:      will get from the network!
-  Setup:        22944 bytes
-  APP code:     23776 bytes	data: 576 bytes
-setup_idt(idt=0x0ffff000)
-setup_gdt(gdt=0x0fffe000)
-setup_sys_pt(pmm={idt=0x0ffff000,gdt=0x0fffe000,pt=0x0fffd000,pd=0x0fffc000,info
-=0x0fffb000,tss0=0x0fffa000,mem=0x0ffba000,io=0x0ffae000,sysc=0x0ffae000,sysd=0x
-0ffae000,syss=0x0ffaa000,memb=0x00000000,memt=0x0ffaa000,fr1b=0x00006000,fr1t=0x
-000a0000,fr2b=0x00100000,fr2t=0x00400000},code_size=0,data_size=0,stack_size=4)
-setup_sys_pd(pmm={idt=0x0ffff000,...},mem_base=0x00000000,mem_top=0x0ffaa000,io_
-base=0xfc000000,io_top=0xfebf1000)
-setup_tss0(tss0=0xff405000)
-PC_Setup::load_app()
-PC_Setup::call_next(ip=0x00000040,sp=0xff7c3ff8) => APPLICATION
-Init_System()
-CPU::init()
-IA32_MMU::free(frame=0x00006000,n=154)
-IA32_MMU::free(frame=0x00100000,n=768)
-IA32_MMU::free(frame=0x00401000,n=64425)
-IA32_MMU::alloc(frames=68) => 0x0005c000
-Heap(addr=0x0005c000,bytes=278528) => 0x004000cc
-PC::init()
-IC::init()
-PCI::init(pmm.io_mem=0xfc000000)
-Timer::init()
-Alarm::init()
-Init_Application()
-IA32_MMU::alloc(frames=4096) => 0x0efaa000
-Heap(addr=0x0efaa000,bytes=16777216) => 0x00400064
-Init_First()
+  Setup:        19328 bytes
+  APP code:     22752 bytes	data: 576 bytes
 [2J[000;000HThe Philosopher's Dinner:
 Philosophers are alive and hungry!
 [007;044H/[013;044H\[016;035H|[013;027H/[007;027H\[019;000HThe dinner is served ...
-[005;032Hthinking[005;032H eating [005;032Hthinking[005;032H eating [010;044Hthinking[016;039Hthinking[016;024Hthinking[010;020Hthinking[005;032Hthinking[010;044H eating [016;024H eating [010;044Hthinking
+[005;032Hthinking[010;044Hthinking[016;039Hthinking[016;024Hthinking[010;020Hthinking[010;044H eating Thread::sleep(running=0x0ffa
+9f54)
+[010;020H eating Thread::sleep(running=0x0ffa9f94)
+Thread::sleep(running=0x0ffa9f34)
+Thread::wakeup(running=0x0ffa9f74)
+[010;044HthinkingThread::wakeup(running=0x0ff
+a9f14)
+Thread::wakeup(running=0x0ffa9f14)
+[010;020HthinkingThread::sleep(running=0x0ffa9f54)
+[005;032H eating [016;024H eating [005;032HthinkingThread::wakeup(running=0x0ffa9f34)
+[016;024Hthinking[016;039H eating Thread::sleep(running=0x0ffa9f74)
+
+[010;020H eating Thread::wakeup(running=0x0ffa9f54)
+[016;039Hthinking[010;044H eating Thread::sleep(running=0x0ffa
+9f94)
+Thread::sleep(running=0x0ffa9f34)
+Thread::wakeup(running=0x0ffa9f14)
+Thread::wakeup(running=0x0ffa9f14)
+[010;020HthinkingThread::sleep(running=0x0ffa9f94)
+[016;024H eating Thread::wakeup(running=0x0ffa9f74)
+[010;044Hthinking[005;032H eating Thread::sleep(running=0x0ffa9f54)
+Thread::wakeup(running=0x0ffa9f34)
+[016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020Hthinking[016;024H eating [010;044Hthinking[005;032H eating [016;024Hthinking[016;039H eating [005;032Hthinking[010;020H eating [016;039Hthinking[010;044H eating [010;020H  done  [016;024H eating [010;044H  done  [005;032H eating [016;024H  done  [016;039H eating [005;032H  done  [020;000HPhilosopher 0 ate 10 times 
+[021;000HPhilosopher 1 ate 10 times 
+[016;039H  done  [022;000HPhilosopher 2 ate 10 times 
+[023;000HPhilosopher 3 ate 10 times 
+[024;000HPhilosopher 4 ate 10 times 
+The end!
+The last thread in the system has exited!
+Rebooting the machine ...

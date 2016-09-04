@@ -31,8 +31,8 @@ protected:
       Thread::wakeup();
     }
     void wakeup_all() {
-      end_atomic();
-      // Thread::wakeup_all();
+      // end_atomic();
+      Thread::wakeup_all();
     }
 };
 

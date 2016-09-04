@@ -168,8 +168,8 @@ void Thread::yield()
 void Thread::sleep()
 {
     lock();
-
     db<Thread>(TRC) << "Thread::sleep(running=" << _running << ")" << endl;
+    // db<Thread>(WRN) << "Thread::sleep(running=" << _running << ")" << endl;
 
     Thread * prev = _running;
     prev->_state = WAITING;
@@ -190,8 +190,8 @@ void Thread::sleep()
 void Thread::wakeup()
 {
   lock();
-
   db<Thread>(TRC) << "Thread::wakeup(running=" << _running << ")" << endl;
+  // db<Thread>(WRN) << "Thread::wakeup(running=" << _running << ")" << endl;
 
   if(!_waiting.empty()){
       Thread * thread = _waiting.remove()->object();
@@ -206,8 +206,8 @@ void Thread::wakeup()
 void Thread::wakeup_all()
 {
   lock();
-
   db<Thread>(TRC) << "Thread::wakeup_all(running=" << _running << ")" << endl;
+  // db<Thread>(WRN) << "Thread::wakeup_all(running=" << _running << ")" << endl;
 
   while(!_waiting.empty()){
     Thread * thread = _waiting.remove()->object();

@@ -27,3 +27,11 @@
 *.exe
 *.out
 *.app
+
+# Epos files
+img/
+src/boot/pc_boot
+src/boot/pc_boot.s
+src/setup/pc_setup
+include/system/config.h
+*.conf

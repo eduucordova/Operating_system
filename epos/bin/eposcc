@@ -6,11 +6,7 @@
 #=========================================================================
 # PATHS
 #=========================================================================
-<<<<<<< HEAD
-EPOS=/home/eduardo/Workspace/Operating_system/epos
-=======
-EPOS=/home/fabio/UFSC/OperatingSystems/SO/epos
->>>>>>> 392ea6ae5bd1248283580de456b0d054ce5d0dc0
+EPOS=/home/fabio/UFSC/OperatingSystems/SO/Operating_system/epos
 TMP=/tmp
 INC=$EPOS/include
 SRC=$EPOS/src

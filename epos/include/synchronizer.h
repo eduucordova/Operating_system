@@ -24,15 +24,15 @@ protected:
 
     void sleep() {
       // Thread::yield();
-      Thread::sleep();
+      Thread::sleep(); // calling the method sleep of the thread
     } // implicit unlock()
     void wakeup() {
       // end_atomic();
       Thread::wakeup();
     }
     void wakeup_all() {
-      end_atomic();
-      // Thread::wakeup_all();
+      // end_atomic();
+      Thread::wakeup_all();
     }
 };
 

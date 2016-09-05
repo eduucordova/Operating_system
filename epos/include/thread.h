@@ -81,9 +81,9 @@ public:
     static Thread * volatile self() { return running(); }
     static void yield();
     static void exit(int status = 0);
-    static void sleep();
-    static void wakeup();
-    static void wakeup_all();
+    static void sleep(); // put the thread on waiting status
+    static void wakeup(); // put the thread on ready status
+    static void wakeup_all(); // put all threads in the waiting queue on the ready queue
 
 protected:
     void constructor_prolog(unsigned int stack_size);
@@ -117,7 +117,7 @@ private:
     static Thread * volatile _running;
     static Queue _ready;
     static Queue _suspended;
-    static Queue _waiting;
+    static Queue _waiting; // queue for the threads on waiting status. Filled in on Thread::sleep
 };
 
 

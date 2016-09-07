@@ -30,8 +30,12 @@
 
 # Epos files
 img/
+img/*.img
+img/*.out
 src/boot/pc_boot
 src/boot/pc_boot.s
 src/setup/pc_setup
 include/system/config.h
+bin/eposcc
+app/
 *.conf

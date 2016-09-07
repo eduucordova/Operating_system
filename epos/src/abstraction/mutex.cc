@@ -22,6 +22,7 @@ void Mutex::lock()
 
     begin_atomic();
     if(tsl(_locked))
+        // does not need to keep checking as the new Implementation of sleep() puts the thread on a waiting queue and this thread only returns to the ready queue when it is woken up
         // while(tsl(_locked))
             sleep(); // implicit end_atomic()
     else

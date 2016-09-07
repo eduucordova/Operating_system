@@ -29,13 +29,13 @@
 *.app
 
 # Epos files
-img/
-img/*.img
-img/*.out
-src/boot/pc_boot
-src/boot/pc_boot.s
-src/setup/pc_setup
-include/system/config.h
-bin/eposcc
-app/
+epos/img/
+epos/img/*.img
+epos/img/*.out
+epos/src/boot/pc_boot
+epos/src/boot/pc_boot.s
+epo/src/setup/pc_setup
+epos/include/system/config.h
+epos/bin/eposcc
+epos/app/
 *.conf

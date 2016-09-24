@@ -17,7 +17,6 @@ Scheduler_Timer * Thread::_timer;
 Thread* volatile Thread::_running;
 Thread::Queue Thread::_ready;
 Thread::Queue Thread::_suspended;
-Thread::Queue Thread::_waiting; // queue for the threads on waiting status
 
 // Methods
 void Thread::constructor_prolog(unsigned int stack_size)
@@ -61,7 +60,9 @@ Thread::~Thread()
 
     _ready.remove(this);
     _suspended.remove(this);
-    _waiting.remove(this); // the thread must be removed from all queues when it is destroied
+
+    if(_waiting)
+        _waiting->remove(this);
 
     unlock();
 
@@ -73,10 +74,20 @@ int Thread::join()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ")" << endl;
+    db<Thread>(WRN) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
 
-    while(_state != FINISHING)
-        yield(); // implicit unlock()
+    if(running() == this)
+    {
+    	_running->suspend();
+    	return 0;
+    }
+
+    if(_state != FINISHING)
+    {
+    	Thread * prev = running();
+    	_waitingForMe.insert(&prev->_link);
+    	prev->suspend();
+    }
 
     unlock();
 
@@ -108,7 +119,7 @@ void Thread::suspend()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::suspend(this=" << this << ")" << endl;
+    db<Thread>(WRN) << "Thread::suspend(this=" << this << ")" << endl;
 
     if(_running != this)
         _ready.remove(this);
@@ -132,7 +143,10 @@ void Thread::resume()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
+    db<Thread>(WRN) << "Thread::resume(this=" << this << ")" << endl;
+
+    if(_state != SUSPENDED)
+    	return;
 
    _suspended.remove(this);
    _state = READY;
@@ -147,7 +161,7 @@ void Thread::yield()
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
+    db<Thread>(WRN) << "Thread::yield(running=" << _running << ")" << endl;
 
     if(!_ready.empty()) {
         Thread * prev = _running;
@@ -165,65 +179,17 @@ void Thread::yield()
 }
 
 
-void Thread::sleep()
-{
-    lock();
-    db<Thread>(TRC) << "Thread::sleep(running=" << _running << ")" << endl;
-    // db<Thread>(WRN) << "Thread::sleep(running=" << _running << ")" << endl;
-
-    Thread * prev = _running;
-    prev->_state = WAITING;
-    _waiting.insert(&prev->_link);
-
-    if(!_ready.empty()){
-      _running = _ready.remove()->object();
-      _running->_state = RUNNING;
-      dispatch(prev, _running);
-    } else {
-      idle();
-    }
-
-    unlock();
-}
-
-
-void Thread::wakeup()
-{
-  lock();
-  db<Thread>(TRC) << "Thread::wakeup(running=" << _running << ")" << endl;
-  // db<Thread>(WRN) << "Thread::wakeup(running=" << _running << ")" << endl;
-
-  if(!_waiting.empty()){
-      Thread * thread = _waiting.remove()->object();
-      thread->_state = READY;
-      _ready.insert(&thread->_link);
-  }
-
-  unlock();
-}
-
-
-void Thread::wakeup_all()
-{
-  lock();
-  db<Thread>(TRC) << "Thread::wakeup_all(running=" << _running << ")" << endl;
-  // db<Thread>(WRN) << "Thread::wakeup_all(running=" << _running << ")" << endl;
-
-  while(!_waiting.empty()){
-    Thread * thread = _waiting.remove()->object();
-    thread->_state = READY;
-    _ready.insert(&thread->_link);
-  }
-
-  unlock();
-}
-
-
 void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(TRC) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
+    db<Thread>(WRN) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
+
+    while(!_running->_waitingForMe.empty())
+    {
+    	Thread * t = _running->_waitingForMe.remove()->object();
+    	t->resume();
+    }
 
     while(_ready.empty() && !_suspended.empty())
         idle(); // implicit unlock();
@@ -251,6 +217,71 @@ void Thread::exit(int status)
     }
 
     unlock();
+}
+
+void Thread::sleep(Queue * q)
+{
+    db<Thread>(WRN) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
+
+    // lock() must be called before entering this method
+    assert(locked());
+
+    while(_ready.empty())
+        idle();
+
+    Thread * prev = running();
+    prev->_state = WAITING;
+    prev->_waiting = q;
+    q->insert(&prev->_link);
+
+    _running = _ready.remove()->object();
+    _running->_state = RUNNING;
+
+    dispatch(prev, _running);
+
+    unlock();
+}
+
+
+void Thread::wakeup(Queue * q)
+{
+    db<Thread>(WRN) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
+
+    // lock() must be called before entering this method
+    assert(locked());
+
+    if(!q->empty()) {
+        Thread * t = q->remove()->object();
+        t->_state = READY;
+        t->_waiting = 0;
+        _ready.insert(&t->_link);
+    }
+
+    unlock();
+
+    if(preemptive)
+        reschedule();
+}
+
+
+void Thread::wakeup_all(Queue * q)
+{
+    db<Thread>(WRN) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
+
+    // lock() must be called before entering this method
+    assert(locked());
+
+    while(!q->empty()) {
+        Thread * t = q->remove()->object();
+        t->_state = READY;
+        t->_waiting = 0;
+        _ready.insert(&t->_link);
+    }
+
+    unlock();
+
+    if(preemptive)
+        reschedule();
 }
 
 

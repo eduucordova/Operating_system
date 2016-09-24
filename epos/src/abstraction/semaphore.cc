@@ -18,33 +18,25 @@ Semaphore::~Semaphore()
 
 void Semaphore::p()
 {
-  begin_atomic(); // ensure that the operation will be atomic
-
     db<Synchronizer>(TRC) << "Semaphore::p(this=" << this << ",value=" << _value << ")" << endl;
 
-    fdec(_value);
-    // while(_value < 0)
-    //     sleep();
-    if(_value < 0){ // avoid the loop that would make the cpu busy while _value < 0 (while the semaphore is locked)
-      Thread::sleep();
-    } else {
-      end_atomic();
-    }
+    begin_atomic();
+    if(fdec(_value) < 1)
+        sleep(); // implicit end_atomic()
+    else
+        end_atomic();
 }
 
 
 void Semaphore::v()
 {
-  begin_atomic(); // ensure that the operation will be atomic
-
     db<Synchronizer>(TRC) << "Semaphore::v(this=" << this << ",value=" << _value << ")" << endl;
 
-    finc(_value);
-    if(_value < 1) {
-        Thread::wakeup();
-    } else {
-      end_atomic();
-    }
+    begin_atomic();
+    if(finc(_value) < 0)
+        wakeup();  // implicit end_atomic()
+    else
+        end_atomic();
 }
 
 __END_SYS

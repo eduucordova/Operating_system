@@ -27,6 +27,10 @@ int consumer()
         empty.v();
     }
 
+    for(int i = iterations - 50; i > 0; --i) {
+    	cout << "In loop for " << i << endl;
+    }
+
     return 0;
 }
 
@@ -44,8 +48,9 @@ int main()
         in = (in + 1) % BUF_SIZE;
         full.v();
     }
-
+    cout << "Waiting for cons: " << cons << endl;
     cons->join();
+    cout << "Ready to go!" << endl;
 
     cout << "The end!" << endl;
 

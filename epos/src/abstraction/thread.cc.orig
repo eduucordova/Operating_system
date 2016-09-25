@@ -183,6 +183,9 @@ void Thread::exit(int status)
 {
     lock();
 
+<<<<<<< HEAD
+    db<Thread>(TRC) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
+=======
     db<Thread>(WRN) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
 
     while(!_running->_waitingForMe.empty())
@@ -190,6 +193,7 @@ void Thread::exit(int status)
     	Thread * t = _running->_waitingForMe.remove()->object();
     	t->resume();
     }
+>>>>>>> b8f41fbda37140a0b98b683a2f4bdd1c478d2ee7
 
     while(_ready.empty() && !_suspended.empty())
         idle(); // implicit unlock();
@@ -221,7 +225,11 @@ void Thread::exit(int status)
 
 void Thread::sleep(Queue * q)
 {
+<<<<<<< HEAD
+    db<Thread>(TRC) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
+=======
     db<Thread>(WRN) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
+>>>>>>> b8f41fbda37140a0b98b683a2f4bdd1c478d2ee7
 
     // lock() must be called before entering this method
     assert(locked());
@@ -245,7 +253,11 @@ void Thread::sleep(Queue * q)
 
 void Thread::wakeup(Queue * q)
 {
+<<<<<<< HEAD
+    db<Thread>(TRC) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
+=======
     db<Thread>(WRN) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
+>>>>>>> b8f41fbda37140a0b98b683a2f4bdd1c478d2ee7
 
     // lock() must be called before entering this method
     assert(locked());
@@ -266,7 +278,11 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
+<<<<<<< HEAD
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
+=======
     db<Thread>(WRN) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
+>>>>>>> b8f41fbda37140a0b98b683a2f4bdd1c478d2ee7
 
     // lock() must be called before entering this method
     assert(locked());

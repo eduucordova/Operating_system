@@ -74,20 +74,10 @@ int Thread::join()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
+    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ")" << endl;
 
-    if(running() == this)
-    {
-    	_running->suspend();
-    	return 0;
-    }
-
-    if(_state != FINISHING)
-    {
-    	Thread * prev = running();
-    	_waitingForMe.insert(&prev->_link);
-    	prev->suspend();
-    }
+    while(_state != FINISHING)
+        yield(); // implicit unlock()
 
     unlock();
 
@@ -119,7 +109,7 @@ void Thread::suspend()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::suspend(this=" << this << ")" << endl;
+    db<Thread>(TRC) << "Thread::suspend(this=" << this << ")" << endl;
 
     if(_running != this)
         _ready.remove(this);
@@ -143,10 +133,7 @@ void Thread::resume()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::resume(this=" << this << ")" << endl;
-
-    if(_state != SUSPENDED)
-    	return;
+    db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
 
    _suspended.remove(this);
    _state = READY;
@@ -161,7 +148,7 @@ void Thread::yield()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::yield(running=" << _running << ")" << endl;
+    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
 
     if(!_ready.empty()) {
         Thread * prev = _running;
@@ -183,13 +170,7 @@ void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
-
-    while(!_running->_waitingForMe.empty())
-    {
-    	Thread * t = _running->_waitingForMe.remove()->object();
-    	t->resume();
-    }
+    db<Thread>(TRC) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
 
     while(_ready.empty() && !_suspended.empty())
         idle(); // implicit unlock();
@@ -221,7 +202,7 @@ void Thread::exit(int status)
 
 void Thread::sleep(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
@@ -245,7 +226,7 @@ void Thread::sleep(Queue * q)
 
 void Thread::wakeup(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
@@ -266,7 +247,7 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());

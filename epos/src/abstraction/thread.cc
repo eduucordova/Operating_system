@@ -76,13 +76,7 @@ int Thread::join()
 
     db<Thread>(WRN) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
 
-    if(running() == this)
-    {
-    	_running->suspend();
-    	return 0;
-    }
-
-    if(_state != FINISHING)
+    if(_state != FINISHING && running() != this)
     {
     	Thread * prev = running();
     	_waitingForMe.insert(&prev->_link);
@@ -191,9 +185,7 @@ void Thread::exit(int status)
     	t->resume();
     }
 
-    while(_ready.empty() && !_suspended.empty())
-        idle(); // implicit unlock();
-
+    if (_ready.empty() && !_suspended.empty())
     lock();
 
     if(!_ready.empty()) {

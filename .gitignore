@@ -29,8 +29,8 @@
 *.app
 
 # Eclipse Files
-epos/.cproject
-epos/.project 
+.cproject
+.project 
 
 # Epos files
 epos/img/*

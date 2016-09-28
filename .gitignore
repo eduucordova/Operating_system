@@ -41,5 +41,4 @@ epos/src/boot/pc_boot.s
 epos/src/setup/pc_setup
 epos/include/system/config.h
 epos/bin/eposcc
-epos/app/
 *.conf

@@ -28,6 +28,10 @@
 *.out
 *.app
 
+# Eclipse project files
+.cproject
+.project
+
 # Epos files
 epos/img/
 epos/img/*.img

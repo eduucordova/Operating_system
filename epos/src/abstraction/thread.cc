@@ -13,6 +13,7 @@ __BEGIN_SYS
 
 // Class attributes
 Scheduler_Timer * Thread::_timer;
+Thread * volatile Thread::_idle;
 
 Thread* volatile Thread::_running;
 Thread::Queue Thread::_ready;
@@ -74,7 +75,7 @@ int Thread::join()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
+    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
 
     if(running() == this)
     {
@@ -119,7 +120,7 @@ void Thread::suspend()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::suspend(this=" << this << ")" << endl;
+    db<Thread>(TRC) << "Thread::suspend(this=" << this << ")" << endl;
 
     if(_running != this)
         _ready.remove(this);
@@ -132,8 +133,9 @@ void Thread::suspend()
         _running->_state = RUNNING;
 
         dispatch(this, _running);
-    } else
-        idle(); // implicit unlock()
+    }
+    // else
+    //     idle(); // implicit unlock()
 
     unlock();
 }
@@ -143,7 +145,7 @@ void Thread::resume()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::resume(this=" << this << ")" << endl;
+    db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
 
     if(_state != SUSPENDED)
     	return;
@@ -161,7 +163,7 @@ void Thread::yield()
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::yield(running=" << _running << ")" << endl;
+    db<Thread>(TRC) << "Thread::yield(running=" << _running << ")" << endl;
 
     if(!_ready.empty()) {
         Thread * prev = _running;
@@ -172,8 +174,9 @@ void Thread::yield()
         _running->_state = RUNNING;
 
         dispatch(prev, _running);
-    } else
-        idle();
+    }
+    // else
+    //     idle();
 
     unlock();
 }
@@ -183,7 +186,7 @@ void Thread::exit(int status)
 {
     lock();
 
-    db<Thread>(WRN) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
+    db<Thread>(TRC) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
 
     while(!_running->_waitingForMe.empty())
     {
@@ -191,8 +194,8 @@ void Thread::exit(int status)
     	t->resume();
     }
 
-    while(_ready.empty() && !_suspended.empty())
-        idle(); // implicit unlock();
+    // while(_ready.empty() && !_suspended.empty())
+    //     idle(); // implicit unlock();
 
     lock();
 
@@ -205,29 +208,31 @@ void Thread::exit(int status)
         _running->_state = RUNNING;
 
         dispatch(prev, _running);
-    } else {
-        db<Thread>(WRN) << "The last thread in the system has exited!" << endl;
-        if(reboot) {
-            db<Thread>(WRN) << "Rebooting the machine ..." << endl;
-            Machine::reboot();
-        } else {
-            db<Thread>(WRN) << "Halting the CPU ..." << endl;
-            CPU::halt();
-        }
     }
+    // thread idle pode fazer exit?
+    // else {
+    //     db<Thread>(WRN) << "The last thread in the system has exited!" << endl;
+    //     if(reboot) {
+    //         db<Thread>(WRN) << "Rebooting the machine ..." << endl;
+    //         Machine::reboot();
+    //     } else {
+    //         db<Thread>(WRN) << "Halting the CPU ..." << endl;
+    //         CPU::halt();
+    //     }
+    // }
 
     unlock();
 }
 
 void Thread::sleep(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::sleep(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
 
-    while(_ready.empty())
-        idle();
+    // while(_ready.empty())
+    //     idle();
 
     Thread * prev = running();
     prev->_state = WAITING;
@@ -245,7 +250,7 @@ void Thread::sleep(Queue * q)
 
 void Thread::wakeup(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::wakeup(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
@@ -266,7 +271,7 @@ void Thread::wakeup(Queue * q)
 
 void Thread::wakeup_all(Queue * q)
 {
-    db<Thread>(WRN) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
+    db<Thread>(TRC) << "Thread::wakeup_all(running=" << running() << ",q=" << q << ")" << endl;
 
     // lock() must be called before entering this method
     assert(locked());
@@ -317,13 +322,41 @@ void Thread::dispatch(Thread * prev, Thread * next)
 
 int Thread::idle()
 {
-    db<Thread>(TRC) << "Thread::idle()" << endl;
+    db<Thread>(WRN) << "Thread::idle()" << endl;
 
-    db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
-    db<Thread>(INF) << "Halting the CPU ..." << endl;
+    /* the thread should execute idle until
+     * it receives an interruption
+     */
+    while(true) {
+      // if(Traits<Thread::trace_idle)
+        db<Thread>(TRC) << "Thread::idle(this=" << running() << ")" << endl;
 
-    CPU::int_enable();
-    CPU::halt();
+      // the system can only be turned off if the suspended and Waiting queues are empty
+      if(_suspended.empty() ){ // verificar fila Waiting
+        CPU::int_disable(); // desabilita interrupcoes
+        db<Thread>(WRN) << "The last thread has exited!!" << endl;
+            if(reboot) {
+                db<Thread>(WRN) << "Rebooting the machine..." << endl;
+                Machine::reboot();
+            } else {
+                db<Thread>(WRN) << "Halting the machine..." << endl;
+                CPU::int_enable();
+                CPU::halt();
+            }
+      }
+      else{
+        db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
+        db<Thread>(INF) << "Halting the CPU ..." << endl;
+
+        CPU::int_enable();
+        CPU::halt();
+      }
+    }
+
+    // db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
+    // db<Thread>(INF) << "Halting the CPU ..." << endl;
+    // CPU::int_enable();
+    // CPU::halt();
 
     return 0;
 }

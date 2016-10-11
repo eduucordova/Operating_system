@@ -7,7 +7,7 @@
 
 using namespace EPOS;
 
-const int iterations = 100;
+const int iterations = 20;
 
 OStream cout;
 
@@ -27,9 +27,9 @@ int consumer()
         empty.v();
     }
 
-    for(int i = iterations - 50; i > 0; --i) {
-    	cout << "In loop for " << i << endl;
-    }
+    // for(int i = iterations - 50; i > 0; --i) {
+    // 	cout << "In loop for " << i << endl;
+    // }
 
     return 0;
 }

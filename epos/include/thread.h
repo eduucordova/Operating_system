@@ -45,7 +45,8 @@ public:
     enum {
         HIGH = 0,
         NORMAL = 15,
-        LOW = 31
+        LOW = 31,
+        IDLE = 47
     };
 
     // Thread Configuration
@@ -115,6 +116,7 @@ protected:
     Queue _waitingForMe;
 
     static Scheduler_Timer * _timer;
+    static Thread * volatile _idle;
 
 private:
     static Thread * volatile _running;

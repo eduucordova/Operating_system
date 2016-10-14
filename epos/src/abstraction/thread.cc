@@ -209,7 +209,6 @@ void Thread::exit(int status)
 
         dispatch(prev, _running);
     }
-    // thread idle pode fazer exit?
     // else {
     //     db<Thread>(WRN) << "The last thread in the system has exited!" << endl;
     //     if(reboot) {
@@ -322,41 +321,29 @@ void Thread::dispatch(Thread * prev, Thread * next)
 
 int Thread::idle()
 {
-    db<Thread>(WRN) << "Thread::idle()" << endl;
-
-    /* the thread should execute idle until
-     * it receives an interruption
-     */
     while(true) {
-      // if(Traits<Thread::trace_idle)
-        db<Thread>(TRC) << "Thread::idle(this=" << running() << ")" << endl;
+      db<Thread>(WRN) << "Thread::idle(this=" << running() << ")" << endl;
 
-      // the system can only be turned off if the suspended and Waiting queues are empty
-      if(_suspended.empty() ){ // verificar fila Waiting
-        CPU::int_disable(); // desabilita interrupcoes
+      if(_suspended.empty()){
+        CPU::int_disable();
         db<Thread>(WRN) << "The last thread has exited!!" << endl;
             if(reboot) {
-                db<Thread>(WRN) << "Rebooting the machine..." << endl;
+                db<Thread>(WRN) << "Rebooting the CPU..." << endl;
                 Machine::reboot();
             } else {
-                db<Thread>(WRN) << "Halting the machine..." << endl;
+                db<Thread>(WRN) << "Halting the CPU..." << endl;
                 CPU::int_enable();
                 CPU::halt();
             }
       }
       else{
-        db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
-        db<Thread>(INF) << "Halting the CPU ..." << endl;
+        db<Thread>(WRN) << "There are no runnable threads at the moment!" << endl;
+        db<Thread>(WRN) << "Halting the CPU ..." << endl;
 
         CPU::int_enable();
         CPU::halt();
       }
     }
-
-    // db<Thread>(INF) << "There are no runnable threads at the moment!" << endl;
-    // db<Thread>(INF) << "Halting the CPU ..." << endl;
-    // CPU::int_enable();
-    // CPU::halt();
 
     return 0;
 }

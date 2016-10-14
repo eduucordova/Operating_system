@@ -17,13 +17,14 @@ void Thread::init()
     // neither by IDLE (which has a lower priority)
 
     // initialize the thread idle and puts it in the ready queue
-    // db<Thread>(WRN) << "Initializing Thread::_idle" << endl;
-    Thread::_idle = new (kmalloc(sizeof(Thread))) Thread(Thread::Configuration(Thread::READY, Thread::IDLE), &idle);
+    db<Thread>(WRN) << "Initializing Thread::_idle" << endl;
 
-    // db<Thread>(WRN) << "Initialized Thread::_idle = " << _idle << endl;
+    Thread::_idle = new (kmalloc(sizeof(Thread)))
+                      Thread(Thread::Configuration(Thread::READY, Thread::IDLE), &idle);
+
+    db<Thread>(WRN) << "Initialized Thread::_idle = " << _idle << endl;
     // db<Init>(WRN) << "Thread::_ready queue size = "<< Thread::_ready.size() << endl;
     // db<Init>(WRN) << "Thread::_ready head = "<< Thread::_ready.head() << endl;
-    // db<Thread>(WRN) << "\n\n\n\n\n" << endl;
 
     if(preemptive)
         _timer = new (kmalloc(sizeof(Scheduler_Timer))) Scheduler_Timer(QUANTUM, time_slicer);

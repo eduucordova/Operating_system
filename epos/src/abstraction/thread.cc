@@ -74,13 +74,7 @@ int Thread::join()
 {
     lock();
 
-<<<<<<< HEAD
     db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ")" << endl;
-
-    while(_state != FINISHING)
-        yield(); // implicit unlock()
-=======
-    db<Thread>(TRC) << "Thread::join(this=" << this << ",state=" << _state << ",running=" << running() << ",state=" << running()->_state << ")" << endl;
 
     if (running() == this)
     {
@@ -94,7 +88,6 @@ int Thread::join()
     	_waitingForMe.insert(&prev->_link);
     	prev->suspend();
     }
->>>>>>> T2
 
     unlock();
 
@@ -151,12 +144,9 @@ void Thread::resume()
     lock();
 
     db<Thread>(TRC) << "Thread::resume(this=" << this << ")" << endl;
-<<<<<<< HEAD
-=======
 
     if(_state != SUSPENDED)
     	return;
->>>>>>> T2
 
    _suspended.remove(this);
    _state = READY;
@@ -194,15 +184,12 @@ void Thread::exit(int status)
     lock();
 
     db<Thread>(TRC) << "Thread::exit(status=" << status << ") [running=" << running() << "]" << endl;
-<<<<<<< HEAD
-=======
 
     while(!_running->_waitingForMe.empty())
     {
     	Thread * t = _running->_waitingForMe.remove()->object();
     	t->resume();
     }
->>>>>>> T2
 
     if (_ready.empty() && !_suspended.empty())
     	_suspended.remove()->object()->resume();

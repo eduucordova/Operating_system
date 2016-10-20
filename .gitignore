@@ -39,6 +39,5 @@ epos/img/*.out
 epos/src/boot/pc_boot
 epos/src/boot/pc_boot.s
 epos/src/setup/pc_setup
-epos/include/system/config.h
 epos/bin/eposcc
 *.conf

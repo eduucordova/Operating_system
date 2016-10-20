@@ -112,6 +112,7 @@ protected:
     volatile State _state;
     Queue * _waiting;
     Queue::Element _link;
+    Queue _waitingForMe;
 
     static Scheduler_Timer * _timer;
 
